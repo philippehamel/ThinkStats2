@@ -11,8 +11,9 @@ import numpy as np
 import thinkstats2 as ts
 import sys
 
+
 def ReadFemResp(dct_file = '2002FemResp.dct',
-                dta_file = '2002FemResp.dta.gz',
+                dta_file = '2002FemResp.dat.gz',
                 nrows = None):
     """
     Read the NSFG data
@@ -22,7 +23,10 @@ def ReadFemResp(dct_file = '2002FemResp.dct',
     :param nrows:
     :return: dataframe
     """
-    #TODO
+    dct = ts.ReadStataDct(dct_file)
+    df = dct.ReadFixedWidth(dta_file, compression = 'gzip', nrows = nrows)
+    CleanFemResp(df)
+    return df
 
 def CleanFemResp(df):
     """
@@ -43,3 +47,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    df = ReadFemResp()
+    print(df.head())
