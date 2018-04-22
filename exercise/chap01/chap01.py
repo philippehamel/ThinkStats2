@@ -10,6 +10,7 @@ from collections import defaultdict
 import numpy as np
 import thinkstats2 as ts
 import sys
+import nsfg
 
 
 def ReadFemResp(dct_file = '2002FemResp.dct',
@@ -28,6 +29,7 @@ def ReadFemResp(dct_file = '2002FemResp.dct',
     CleanFemResp(df)
     return df
 
+
 def CleanFemResp(df):
     """
     Clean the FemResp Data
@@ -37,15 +39,46 @@ def CleanFemResp(df):
     """
     #TODO
 
-def main():
+
+def ValidatePregnum(resp):
+    """Validate pregnum in the respondent file.
+
+    resp: respondent DataFrame
     """
-    Test the fonction in the module
-    :return: nothing
-    """
-    #TODO
+    # read the pregnancy frame
+    preg = nsfg.ReadFemPreg()
+
+    # make the map from caseid to list of pregnancy indices
+    preg_map = nsfg.MakePregMap(preg)
+
+    # iterate through the respondent pregnum series
+    for index, pregnum in resp.pregnum.items():
+        caseid = resp.caseid[index]
+        indices = preg_map[caseid]
+
+        # check that pregnum from the respondent file equals
+        # the number of records in the pregnancy file
+        if len(indices) != pregnum:
+            print(caseid, len(indices), pregnum)
+            return False
+
+    return True
 
 
-if __name__ == "__main__":
-    main()
-    df = ReadFemResp()
-    print(df.head())
+def main(script):
+    """Tests the functions in this module.
+
+    script: string script name
+    """
+    resp = ReadFemResp()
+
+    assert(len(resp) == 7643)
+    assert(resp.pregnum.value_counts()[1] == 1267)
+    assert(ValidatePregnum(resp))
+
+    print('%s: All tests passed.' % script)
+
+
+if __name__ == '__main__':
+    main(*sys.argv)
+
